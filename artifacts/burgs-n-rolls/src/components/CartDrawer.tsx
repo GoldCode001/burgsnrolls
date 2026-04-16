@@ -9,7 +9,7 @@ interface CartDrawerProps {
   onClear: () => void;
 }
 
-const WHATSAPP_NUMBER = "905551234567"; // Replace with restaurant's actual WhatsApp number
+const WHATSAPP_NUMBER = "905488414151";
 
 export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDrawerProps) {
   const total = items.reduce((sum, i) => sum + (parseFloat(i.price.replace("₺", "")) * i.qty), 0);
