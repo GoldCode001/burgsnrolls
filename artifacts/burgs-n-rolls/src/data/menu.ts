@@ -15,6 +15,7 @@ export interface Category {
 
 export const categories: Category[] = [
   { id: "wraps", label: "Wraps & Durumlar" },
+  { id: "burgers", label: "Chicken Burgers" },
   { id: "kids", label: "Kids Menu" },
   { id: "salads", label: "Salads" },
 ];

@@ -44,8 +44,12 @@ export default function App() {
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-border shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-sm">
-              <span className="text-white font-black text-xs leading-tight text-center">B&R</span>
+            <div className="w-11 h-11 rounded-full overflow-hidden shadow-sm border border-border bg-white shrink-0">
+              <img
+                src="/logo.jpeg"
+                alt="Burgs & Rolls"
+                className="w-full h-full object-cover object-center scale-110"
+              />
             </div>
             <div>
               <h1 className="font-black text-lg text-foreground leading-none tracking-tight">Burgs & Rolls</h1>
@@ -89,13 +93,25 @@ export default function App() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {filtered.map((item, i) => (
-            <div key={item.id} style={{ animationDelay: `${i * 0.05}s` }}>
-              <MenuCard item={item} onAddToCart={addToCart} />
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center">
+              <img src="/logo.jpeg" alt="" className="w-full h-full object-cover object-center rounded-full scale-110" />
             </div>
-          ))}
-        </div>
+            <p className="font-bold text-foreground text-lg">Coming Soon!</p>
+            <p className="text-muted-foreground text-sm text-center max-w-xs">
+              We're preparing something delicious. Check back soon!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {filtered.map((item, i) => (
+              <div key={item.id} style={{ animationDelay: `${i * 0.05}s` }}>
+                <MenuCard item={item} onAddToCart={addToCart} />
+              </div>
+            ))}
+          </div>
+        )}
 
         {activeCategory === "wraps" && (
           <div className="mt-8 bg-primary/5 border border-primary/20 rounded-2xl p-4 text-center">
