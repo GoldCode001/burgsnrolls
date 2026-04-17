@@ -5,9 +5,10 @@ import { ShoppingCart, Plus, Check } from "lucide-react";
 interface MenuCardProps {
   item: MenuItem;
   onAddToCart: (item: MenuItem) => void;
+  tall?: boolean;
 }
 
-export function MenuCard({ item, onAddToCart }: MenuCardProps) {
+export function MenuCard({ item, onAddToCart, tall = false }: MenuCardProps) {
   const [added, setAdded] = useState(false);
 
   function handleAdd() {
@@ -18,7 +19,7 @@ export function MenuCard({ item, onAddToCart }: MenuCardProps) {
 
   return (
     <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border flex flex-col transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 animate-slide-up">
-      <div className="relative w-full aspect-[4/3] bg-secondary overflow-hidden">
+      <div className={`relative w-full bg-secondary overflow-hidden ${tall ? "aspect-[3/4]" : "aspect-[4/3]"}`}>
         {item.image ? (
           <img
             src={item.image}

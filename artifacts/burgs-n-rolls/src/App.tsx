@@ -12,7 +12,7 @@ export interface CartItem extends MenuItem {
 export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [activeCategory, setActiveCategory] = useState("wraps");
+  const [activeCategory, setActiveCategory] = useState("special");
   const [cartBounce, setCartBounce] = useState(false);
 
   const totalQty = cartItems.reduce((sum, i) => sum + i.qty, 0);
@@ -82,7 +82,11 @@ export default function App() {
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
                 className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                  activeCategory === cat.id
+                  cat.id === "special"
+                    ? activeCategory === "special"
+                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md shadow-orange-200 scale-105"
+                      : "bg-gradient-to-r from-orange-400 to-red-400 text-white hover:from-orange-500 hover:to-red-500"
+                    : activeCategory === cat.id
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "bg-secondary text-foreground hover:bg-secondary/80"
                 }`}
@@ -102,6 +106,14 @@ export default function App() {
             <p className="text-muted-foreground text-sm text-center max-w-xs">
               We're preparing something delicious. Check back soon!
             </p>
+          </div>
+        ) : activeCategory === "special" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {filtered.map((item, i) => (
+              <div key={item.id} style={{ animationDelay: `${i * 0.05}s` }} className="ring-2 ring-orange-400 rounded-2xl shadow-lg shadow-orange-100">
+                <MenuCard item={item} onAddToCart={addToCart} tall />
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

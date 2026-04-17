@@ -14,6 +14,7 @@ export interface Category {
 }
 
 export const categories: Category[] = [
+  { id: "special", label: "🔥 Special Offers" },
   { id: "wraps", label: "Wraps & Durumlar" },
   { id: "burgers", label: "Chicken Burgers" },
   { id: "beef", label: "Beef Burgers" },
@@ -24,6 +25,24 @@ export const categories: Category[] = [
 ];
 
 export const menuItems: MenuItem[] = [
+  {
+    id: "o1",
+    code: "OFFER",
+    name: "#Qaidi 804",
+    image: "/offer1.png",
+    ingredients: ["1 Zinger Burger", "3 Onion Rings", "3 Chicken Popcorn", "Fries", "Cola"],
+    category: "special",
+    price: "Limited Offer",
+  },
+  {
+    id: "o2",
+    code: "OFFER",
+    name: "Happy Hour",
+    image: "/offer2.png",
+    ingredients: ["1 Zinger Burger", "1 Wrap", "Fries", "1L Coca-Cola"],
+    category: "special",
+    price: "Limited Offer",
+  },
   {
     id: "d1",
     code: "D1",
