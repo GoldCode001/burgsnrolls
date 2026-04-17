@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { LogOut, Edit2, Eye, EyeOff, X, Loader2, Upload, ChevronDown, ChevronUp, ImageIcon } from "lucide-react";
 
-const API = "";
+const API = import.meta.env.VITE_API_URL ?? "";
 
 interface Category {
   id: number;
