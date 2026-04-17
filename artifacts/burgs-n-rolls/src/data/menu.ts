@@ -20,6 +20,7 @@ export const categories: Category[] = [
   { id: "kentucky", label: "Kentucky Menu" },
   { id: "kids", label: "Kids Menu" },
   { id: "salads", label: "Salads" },
+  { id: "rice", label: "Rice Menu (Pilav)" },
 ];
 
 export const menuItems: MenuItem[] = [
@@ -373,5 +374,41 @@ export const menuItems: MenuItem[] = [
     ingredients: ["Fresh Vegetables", "Salad Mix", "Ayran"],
     category: "salads",
     price: "220₺",
+  },
+  {
+    id: "r1",
+    code: "R1",
+    name: "Basmati Popcorn",
+    image: "/r1.jpeg",
+    ingredients: ["Basmati Rice", "Popcorn Chicken", "Fries", "Ketchup", "Mayonnaise", "Ayran"],
+    category: "rice",
+    price: "250₺",
+  },
+  {
+    id: "r2",
+    code: "R2",
+    name: "Basmati Fingers",
+    image: "/r2.jpeg",
+    ingredients: ["Basmati Rice", "Chicken Fingers", "Fries", "Ketchup", "Mayonnaise", "Ayran"],
+    category: "rice",
+    price: "270₺",
+  },
+  {
+    id: "r3",
+    code: "R3",
+    name: "Basmati Hot Wings",
+    image: "/r3.jpeg",
+    ingredients: ["Basmati Rice", "3 Hot Wings", "Fries", "Ketchup", "Mayonnaise", "Ayran"],
+    category: "rice",
+    price: "280₺",
+  },
+  {
+    id: "r4",
+    code: "R4",
+    name: "Basmati Shashlik (Özel Soslu Tavuk)",
+    image: "/r4.jpeg",
+    ingredients: ["Basmati Rice", "Chicken Shashlik", "Special Sauce", "Fries", "Ketchup", "Mayonnaise", "Ayran"],
+    category: "rice",
+    price: "280₺",
   },
 ];
