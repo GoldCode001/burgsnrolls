@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { LogOut, Edit2, Eye, EyeOff, Save, X, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { LogOut, Edit2, Eye, EyeOff, X, Loader2, Upload, ChevronDown, ChevronUp, ImageIcon } from "lucide-react";
 
 const API = "";
 
@@ -90,6 +90,94 @@ function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
   );
 }
 
+function ImageUploader({
+  token,
+  currentImageUrl,
+  onUploaded,
+}: {
+  token: string;
+  currentImageUrl: string | null;
+  onUploaded: (objectPath: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(currentImageUrl);
+  const [error, setError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file.");
+      return;
+    }
+    setUploading(true);
+    setError("");
+    try {
+      const urlRes = await fetch(`${API}/api/storage/uploads/request-url`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: file.name, contentType: file.type, size: file.size }),
+      });
+      if (!urlRes.ok) throw new Error("Could not get upload URL");
+      const { uploadURL, objectPath } = await urlRes.json();
+
+      const uploadRes = await fetch(uploadURL, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!uploadRes.ok) throw new Error("Upload failed");
+
+      const localPreview = URL.createObjectURL(file);
+      setPreview(localPreview);
+      onUploaded(objectPath);
+    } catch (err) {
+      setError("Image upload failed. Try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Photo</label>
+      <div
+        className="relative w-full h-44 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center cursor-pointer hover:border-orange-400 transition-colors"
+        onClick={() => inputRef.current?.click()}
+      >
+        {preview ? (
+          <img src={preview} alt="preview" className="w-full h-full object-cover" />
+        ) : (
+          <div className="text-center text-gray-400">
+            <ImageIcon className="w-8 h-8 mx-auto mb-1" />
+            <p className="text-sm">No image</p>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+          {uploading ? (
+            <Loader2 className="w-8 h-8 text-white animate-spin" />
+          ) : (
+            <div className="text-white text-center">
+              <Upload className="w-8 h-8 mx-auto mb-1" />
+              <p className="text-sm font-semibold">Tap to change photo</p>
+            </div>
+          )}
+        </div>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+      />
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+  );
+}
+
 function EditModal({
   item,
   token,
@@ -137,22 +225,21 @@ function EditModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto">
         <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white z-10">
-          <h2 className="font-bold text-gray-900">Edit {item.code}</h2>
+          <h2 className="font-bold text-gray-900">Edit {item.code} – {item.name}</h2>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
             <X className="w-5 h-5" />
           </button>
         </div>
         <div className="p-4 space-y-4">
-          {item.imageUrl && (
-            <img
-              src={imageUrl || item.imageUrl}
-              alt={item.name}
-              className="w-full h-36 object-cover rounded-xl"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
-          )}
+          <ImageUploader
+            token={token}
+            currentImageUrl={imageUrl || null}
+            onUploaded={(objectPath) => {
+              setImageUrl(`/api/storage/objects${objectPath.replace(/^\/objects/, "")}`);
+            }}
+          />
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Item Name</label>
             <input
@@ -171,15 +258,6 @@ function EditModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Image URL</label>
-            <input
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-              placeholder="https://... or /b1.jpeg"
-            />
-          </div>
-          <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Ingredients (one per line)</label>
             <textarea
               value={ingredients}
@@ -189,7 +267,7 @@ function EditModal({
             />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-2 pt-1 pb-2">
             <button
               onClick={onClose}
               className="flex-1 border border-gray-300 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors"
@@ -238,24 +316,24 @@ function ItemRow({
 
   return (
     <>
-      <div className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${item.active ? "bg-white" : "bg-gray-50 opacity-60"}`}>
+      <div className={`flex items-center gap-3 p-3 rounded-xl ${item.active ? "bg-white shadow-sm" : "bg-gray-50 opacity-50"}`}>
         {item.imageUrl ? (
-          <img src={item.imageUrl} alt={item.name} className="w-12 h-12 rounded-lg object-cover shrink-0" />
+          <img src={item.imageUrl} alt={item.name} className="w-14 h-14 rounded-lg object-cover shrink-0" />
         ) : (
-          <div className="w-12 h-12 rounded-lg bg-orange-100 shrink-0 flex items-center justify-center text-orange-400 text-xs font-bold">
+          <div className="w-14 h-14 rounded-lg bg-orange-100 shrink-0 flex items-center justify-center text-orange-400 text-xs font-bold">
             {item.code}
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-900 text-sm truncate">{item.name}</p>
-          <p className="text-orange-600 font-bold text-sm">{item.price}</p>
+          <p className="font-semibold text-gray-900 text-sm leading-tight">{item.name}</p>
+          <p className="text-orange-600 font-bold text-sm mt-0.5">{item.price}</p>
           <p className="text-gray-400 text-xs">{item.code}</p>
         </div>
         <div className="flex gap-2 shrink-0">
           <button
             onClick={() => setEditing(true)}
             className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
-            title="Edit"
+            title="Edit item"
           >
             <Edit2 className="w-4 h-4" />
           </button>
@@ -366,10 +444,6 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-4">
-        <div className="mb-4 p-3 bg-blue-50 rounded-xl text-sm text-blue-700">
-          <strong>Tip:</strong> Tap <Edit2 className="w-3 h-3 inline" /> to edit a price or name. Tap <EyeOff className="w-3 h-3 inline" /> to hide an item (e.g. when out of stock).
-        </div>
-
         {loading && (
           <div className="flex items-center justify-center py-20 text-gray-400">
             <Loader2 className="w-6 h-6 animate-spin mr-2" />
@@ -398,7 +472,6 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
 
 export default function AuthorPage() {
   const { token, save, clear } = useToken();
-
   if (!token) return <LoginPage onLogin={save} />;
   return <Dashboard token={token} onLogout={clear} />;
 }
