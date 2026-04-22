@@ -12,7 +12,11 @@ interface CartDrawerProps {
 const WHATSAPP_NUMBER = "905488414151";
 
 export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDrawerProps) {
-  const total = items.reduce((sum, i) => sum + (parseFloat(i.price.replace("₺", "")) * i.qty), 0);
+  const total = items.reduce((sum, i) => {
+    const n = parseFloat(i.price.replace(/[^\d.,]/g, "").replace(",", "."));
+    return Number.isFinite(n) ? sum + n * i.qty : sum;
+  }, 0);
+  const hasUnpriced = items.some((i) => !Number.isFinite(parseFloat(i.price.replace(/[^\d.,]/g, "").replace(",", "."))));
 
   function placeOrder() {
     if (items.length === 0) return;
@@ -96,8 +100,15 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
           <div className="px-5 py-4 border-t border-border flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Estimated Total</span>
-              <span className="font-bold text-lg text-foreground">{total.toFixed(0)}₺</span>
+              <span className="font-bold text-lg text-foreground">
+                {total.toFixed(0)}₺{hasUnpriced ? "+" : ""}
+              </span>
             </div>
+            {hasUnpriced && (
+              <p className="text-xs text-muted-foreground -mt-1">
+                Some items are special offers — final price confirmed on WhatsApp.
+              </p>
+            )}
             <button
               onClick={placeOrder}
               className="w-full bg-green-500 hover:bg-green-600 active:scale-95 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer text-base"

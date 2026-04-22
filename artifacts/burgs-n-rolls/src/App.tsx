@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ShoppingCart } from "lucide-react";
-import { menuItems, categories } from "./data/menu";
-import type { MenuItem } from "./data/menu";
+import { menuItems as fallbackItems, categories as fallbackCategories } from "./data/menu";
+import type { MenuItem, Category } from "./data/menu";
 import { MenuCard } from "./components/MenuCard";
 import { CartDrawer } from "./components/CartDrawer";
+import { fetchMenu } from "./lib/api";
 
 export interface CartItem extends MenuItem {
   qty: number;
@@ -14,6 +15,20 @@ export default function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [activeCategory, setActiveCategory] = useState("special");
   const [cartBounce, setCartBounce] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(fallbackItems);
+  const [categories, setCategories] = useState<Category[]>(fallbackCategories);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchMenu()
+      .then((data) => {
+        if (cancelled) return;
+        if (data.categories.length > 0) setCategories(data.categories);
+        if (data.items.length > 0) setMenuItems(data.items);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const totalQty = cartItems.reduce((sum, i) => sum + i.qty, 0);
 
