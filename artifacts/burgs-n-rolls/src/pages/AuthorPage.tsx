@@ -134,25 +134,20 @@ function ImageUploader({
     setUploading(true);
     setError("");
     try {
-      const urlRes = await apiFetch(`/api/storage/uploads/request-url`, {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await apiFetch(`/api/storage/upload`, {
         method: "POST",
         token,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: file.name, contentType: file.type, size: file.size }),
+        body: formData,
       });
-      if (!urlRes.ok) throw new Error("Could not get upload URL");
-      const { uploadURL, objectPath } = await urlRes.json();
-
-      const uploadRes = await fetch(uploadURL, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-      if (!uploadRes.ok) throw new Error("Upload failed");
+      if (!res.ok) throw new Error("Upload failed");
+      const { url } = await res.json();
 
       const localPreview = URL.createObjectURL(file);
       setPreview(localPreview);
-      onUploaded(objectPath);
+      onUploaded(url);
     } catch {
       setError("Image upload failed. Try again.");
     } finally {
@@ -279,9 +274,7 @@ function ItemModal({
           <ImageUploader
             token={token}
             currentImageUrl={imageUrl || null}
-            onUploaded={(objectPath) => {
-              setImageUrl(`/api/storage/objects${objectPath.replace(/^\/objects/, "")}`);
-            }}
+            onUploaded={(url) => setImageUrl(url)}
           />
           {mode === "create" && (
             <div>
