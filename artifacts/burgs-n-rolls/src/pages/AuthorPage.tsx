@@ -112,6 +112,13 @@ function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
   );
 }
 
+function resolveImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/api/")) return `${API}${url}`;
+  return url;
+}
+
 function ImageUploader({
   token,
   currentImageUrl,
@@ -122,7 +129,8 @@ function ImageUploader({
   onUploaded: (objectPath: string) => void;
 }) {
   const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(currentImageUrl);
+  const [preview, setPreview] = useState<string | null>(resolveImageUrl(currentImageUrl));
+  const [broken, setBroken] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -147,6 +155,7 @@ function ImageUploader({
 
       const localPreview = URL.createObjectURL(file);
       setPreview(localPreview);
+      setBroken(false);
       onUploaded(url);
     } catch {
       setError("Image upload failed. Try again.");
@@ -162,8 +171,13 @@ function ImageUploader({
         className="relative w-full h-44 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center cursor-pointer hover:border-orange-400 transition-colors"
         onClick={() => inputRef.current?.click()}
       >
-        {preview ? (
-          <img src={preview} alt="preview" className="w-full h-full object-cover" />
+        {preview && !broken ? (
+          <img
+            src={preview}
+            alt="preview"
+            className="w-full h-full object-cover"
+            onError={() => setBroken(true)}
+          />
         ) : (
           <div className="text-center text-gray-400">
             <ImageIcon className="w-8 h-8 mx-auto mb-1" />
@@ -499,15 +513,18 @@ function ItemRow({
       <div className={`flex items-center gap-3 p-3 rounded-xl ${item.active ? "bg-white shadow-sm" : "bg-gray-50 opacity-50"}`}>
         {item.imageUrl ? (
           <img
-            src={item.imageUrl.startsWith("/api/") ? `${API}${item.imageUrl}` : item.imageUrl}
+            src={resolveImageUrl(item.imageUrl)!}
             alt={item.name}
             className="w-14 h-14 rounded-lg object-cover shrink-0"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; (e.currentTarget.nextSibling as HTMLElement).style.display = "flex"; }}
           />
-        ) : (
-          <div className="w-14 h-14 rounded-lg bg-orange-100 shrink-0 flex items-center justify-center text-orange-400 text-xs font-bold">
-            {item.code}
-          </div>
-        )}
+        ) : null}
+        <div
+          className="w-14 h-14 rounded-lg bg-orange-100 shrink-0 items-center justify-center text-orange-400 text-xs font-bold"
+          style={{ display: item.imageUrl ? "none" : "flex" }}
+        >
+          {item.code}
+        </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-gray-900 text-sm leading-tight">{item.name}</p>
           <p className="text-orange-600 font-bold text-sm mt-0.5">{item.price}</p>
