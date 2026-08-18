@@ -3,8 +3,9 @@ import {
   LogOut, Edit2, Eye, EyeOff, X, Loader2, Upload, ChevronDown, ChevronUp,
   ImageIcon, Plus, Trash2,
 } from "lucide-react";
+import { supabase } from "../lib/supabase";
 
-const API = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
+const ADMIN_EMAIL = "admin@burgsnrolls.org";
 
 interface Category {
   id: number;
@@ -26,33 +27,50 @@ interface MenuItem {
   displayOrder: number;
 }
 
-function useToken() {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem("author_token"));
-  const save = (t: string) => { localStorage.setItem("author_token", t); setToken(t); };
-  const clear = () => { localStorage.removeItem("author_token"); setToken(null); };
-  return { token, save, clear };
+function dbToCategory(row: any): Category {
+  return {
+    id: row.id,
+    code: row.code,
+    label: row.label,
+    displayOrder: row.display_order,
+    active: row.active,
+  };
 }
 
-async function apiFetch(
-  path: string,
-  opts: RequestInit & { token?: string } = {},
-): Promise<Response> {
-  const { token, headers, ...rest } = opts;
-  const res = await fetch(`${API}${path}`, {
-    ...rest,
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(headers ?? {}),
-    },
-  });
-  if (res.status === 401 && token) {
-    localStorage.removeItem("author_token");
-    window.location.reload();
-  }
-  return res;
+function dbToItem(row: any): MenuItem {
+  return {
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    imageUrl: row.image_url,
+    ingredients: row.ingredients ?? [],
+    categoryCode: row.category_code,
+    price: row.price,
+    active: row.active,
+    displayOrder: row.display_order,
+  };
 }
 
-function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
+function useSession() {
+  const [token, setToken] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setToken(data.session?.access_token ?? null);
+      setReady(true);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setToken(session?.access_token ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const clear = async () => { await supabase.auth.signOut(); };
+  return { token, ready, clear };
+}
+
+function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -62,16 +80,13 @@ function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${API}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+      const { error } = await supabase.auth.signInWithPassword({
+        email: ADMIN_EMAIL,
+        password,
       });
-      if (!res.ok) { setError("Wrong password. Try again."); return; }
-      const { token } = await res.json();
-      onLogin(token);
+      if (error) { setError("Wrong password. Try again."); return; }
     } catch {
-      setError("Connection error. Make sure the server is running.");
+      setError("Connection error.");
     } finally {
       setLoading(false);
     }
@@ -112,24 +127,15 @@ function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
   );
 }
 
-function resolveImageUrl(url: string | null): string | null {
-  if (!url) return null;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  if (url.startsWith("/api/")) return `${API}${url}`;
-  return url;
-}
-
 function ImageUploader({
-  token,
   currentImageUrl,
   onUploaded,
 }: {
-  token: string;
   currentImageUrl: string | null;
-  onUploaded: (objectPath: string) => void;
+  onUploaded: (url: string) => void;
 }) {
   const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(resolveImageUrl(currentImageUrl));
+  const [preview, setPreview] = useState<string | null>(currentImageUrl);
   const [broken, setBroken] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -142,21 +148,16 @@ function ImageUploader({
     setUploading(true);
     setError("");
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      const path = `${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("menu-images")
+        .upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
 
-      const res = await apiFetch(`/api/storage/upload`, {
-        method: "POST",
-        token,
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Upload failed");
-      const { url } = await res.json();
-
-      const localPreview = URL.createObjectURL(file);
-      setPreview(localPreview);
+      const { data } = supabase.storage.from("menu-images").getPublicUrl(path);
+      setPreview(data.publicUrl);
       setBroken(false);
-      onUploaded(url);
+      onUploaded(data.publicUrl);
     } catch {
       setError("Image upload failed. Try again.");
     } finally {
@@ -212,7 +213,7 @@ function ItemModal({
   initial,
   categories,
   defaultCategoryCode,
-  token,
+  existingItems,
   onSaved,
   onClose,
 }: {
@@ -220,7 +221,7 @@ function ItemModal({
   initial?: MenuItem;
   categories: Category[];
   defaultCategoryCode?: string;
-  token: string;
+  existingItems: MenuItem[];
   onSaved: (item: MenuItem) => void;
   onClose: () => void;
 }) {
@@ -243,29 +244,42 @@ function ItemModal({
     setSaving(true);
     setError("");
     try {
-      const body = {
-        ...(mode === "create" ? { code: code.trim().toUpperCase(), categoryCode } : {}),
-        name: name.trim(),
-        price: price.trim(),
-        imageUrl: imageUrl.trim() || null,
-        ingredients: ingredients.split("\n").map((s) => s.trim()).filter(Boolean),
-        ...(mode === "edit" ? { categoryCode } : {}),
-      };
-      const res = await apiFetch(
-        mode === "create" ? `/api/menu/items` : `/api/menu/items/${initial!.code}`,
-        {
-          method: mode === "create" ? "POST" : "PUT",
-          token,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        },
-      );
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Failed to save changes.");
-        return;
+      const ingredientList = ingredients.split("\n").map((s) => s.trim()).filter(Boolean);
+
+      if (mode === "create") {
+        const displayOrder = existingItems.filter((i) => i.categoryCode === categoryCode).length;
+        const { data, error: insertError } = await supabase
+          .from("menu_items")
+          .insert({
+            code: code.trim().toUpperCase(),
+            name: name.trim(),
+            price: price.trim(),
+            image_url: imageUrl.trim() || null,
+            ingredients: ingredientList,
+            category_code: categoryCode,
+            active: true,
+            display_order: displayOrder,
+          })
+          .select()
+          .single();
+        if (insertError) { setError(insertError.message); return; }
+        onSaved(dbToItem(data));
+      } else {
+        const { data, error: updateError } = await supabase
+          .from("menu_items")
+          .update({
+            name: name.trim(),
+            price: price.trim(),
+            image_url: imageUrl.trim() || null,
+            ingredients: ingredientList,
+            category_code: categoryCode,
+          })
+          .eq("code", initial!.code)
+          .select()
+          .single();
+        if (updateError) { setError(updateError.message); return; }
+        onSaved(dbToItem(data));
       }
-      onSaved(await res.json());
     } catch {
       setError("Connection error.");
     } finally {
@@ -286,7 +300,6 @@ function ItemModal({
         </div>
         <div className="p-4 space-y-4">
           <ImageUploader
-            token={token}
             currentImageUrl={imageUrl || null}
             onUploaded={(url) => setImageUrl(url)}
           />
@@ -365,13 +378,13 @@ function ItemModal({
 function CategoryModal({
   mode,
   initial,
-  token,
+  existingCategories,
   onSaved,
   onClose,
 }: {
   mode: "edit" | "create";
   initial?: Category;
-  token: string;
+  existingCategories: Category[];
   onSaved: (cat: Category) => void;
   onClose: () => void;
 }) {
@@ -386,24 +399,29 @@ function CategoryModal({
     setSaving(true);
     setError("");
     try {
-      const body = mode === "create"
-        ? { code: code.trim().toLowerCase(), label: label.trim() }
-        : { label: label.trim() };
-      const res = await apiFetch(
-        mode === "create" ? `/api/menu/categories` : `/api/menu/categories/${initial!.code}`,
-        {
-          method: mode === "create" ? "POST" : "PUT",
-          token,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        },
-      );
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Failed to save category.");
-        return;
+      if (mode === "create") {
+        const { data, error: insertError } = await supabase
+          .from("categories")
+          .insert({
+            code: code.trim().toLowerCase(),
+            label: label.trim(),
+            active: true,
+            display_order: existingCategories.length,
+          })
+          .select()
+          .single();
+        if (insertError) { setError(insertError.message); return; }
+        onSaved(dbToCategory(data));
+      } else {
+        const { data, error: updateError } = await supabase
+          .from("categories")
+          .update({ label: label.trim() })
+          .eq("code", initial!.code)
+          .select()
+          .single();
+        if (updateError) { setError(updateError.message); return; }
+        onSaved(dbToCategory(data));
       }
-      onSaved(await res.json());
     } catch {
       setError("Connection error.");
     } finally {
@@ -470,13 +488,13 @@ function CategoryModal({
 function ItemRow({
   item,
   categories,
-  token,
+  existingItems,
   onUpdate,
   onDelete,
 }: {
   item: MenuItem;
   categories: Category[];
-  token: string;
+  existingItems: MenuItem[];
   onUpdate: (updated: MenuItem) => void;
   onDelete: (code: string) => void;
 }) {
@@ -486,10 +504,13 @@ function ItemRow({
   const toggle = async () => {
     setBusy(true);
     try {
-      const res = await apiFetch(`/api/menu/items/${item.code}/toggle`, {
-        method: "PATCH", token,
-      });
-      if (res.ok) onUpdate(await res.json());
+      const { data, error } = await supabase
+        .from("menu_items")
+        .update({ active: !item.active })
+        .eq("code", item.code)
+        .select()
+        .single();
+      if (!error && data) onUpdate(dbToItem(data));
     } finally {
       setBusy(false);
     }
@@ -499,10 +520,8 @@ function ItemRow({
     if (!confirm(`Delete ${item.name}? This cannot be undone.`)) return;
     setBusy(true);
     try {
-      const res = await apiFetch(`/api/menu/items/${item.code}`, {
-        method: "DELETE", token,
-      });
-      if (res.ok) onDelete(item.code);
+      const { error } = await supabase.from("menu_items").delete().eq("code", item.code);
+      if (!error) onDelete(item.code);
     } finally {
       setBusy(false);
     }
@@ -513,7 +532,7 @@ function ItemRow({
       <div className={`flex items-center gap-3 p-3 rounded-xl ${item.active ? "bg-white shadow-sm" : "bg-gray-50 opacity-50"}`}>
         {item.imageUrl ? (
           <img
-            src={resolveImageUrl(item.imageUrl)!}
+            src={item.imageUrl}
             alt={item.name}
             className="w-14 h-14 rounded-lg object-cover shrink-0"
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; (e.currentTarget.nextSibling as HTMLElement).style.display = "flex"; }}
@@ -561,7 +580,7 @@ function ItemRow({
           mode="edit"
           initial={item}
           categories={categories}
-          token={token}
+          existingItems={existingItems}
           onSaved={(updated) => { onUpdate(updated); setEditing(false); }}
           onClose={() => setEditing(false)}
         />
@@ -574,7 +593,6 @@ function CategorySection({
   category,
   items,
   categories,
-  token,
   onUpdateItem,
   onDeleteItem,
   onAddItem,
@@ -584,7 +602,6 @@ function CategorySection({
   category: Category;
   items: MenuItem[];
   categories: Category[];
-  token: string;
   onUpdateItem: (updated: MenuItem) => void;
   onDeleteItem: (code: string) => void;
   onAddItem: (categoryCode: string) => void;
@@ -636,7 +653,7 @@ function CategorySection({
               key={item.id}
               item={item}
               categories={categories}
-              token={token}
+              existingItems={items}
               onUpdate={onUpdateItem}
               onDelete={onDeleteItem}
             />
@@ -654,7 +671,7 @@ function CategorySection({
   );
 }
 
-function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
+function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -668,11 +685,20 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
     setLoading(true);
     setError("");
     try {
-      const res = await apiFetch(`/api/menu`);
-      if (!res.ok) throw new Error("Failed");
-      const data = await res.json();
-      setCategories(data.categories);
-      setItems(data.items);
+      const { data: catData, error: catError } = await supabase
+        .from("categories")
+        .select("*")
+        .order("display_order");
+      if (catError) throw catError;
+
+      const { data: itemData, error: itemError } = await supabase
+        .from("menu_items")
+        .select("*")
+        .order("display_order");
+      if (itemError) throw itemError;
+
+      setCategories(catData.map(dbToCategory));
+      setItems(itemData.map(dbToItem));
     } catch {
       setError("Failed to load menu. Please refresh.");
     } finally {
@@ -690,7 +716,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
     });
   }, []);
 
-  const handleDeleteItem = useCallback(async (code: string) => {
+  const handleDeleteItem = useCallback((code: string) => {
     setItems((prev) => prev.filter((i) => i.code !== code));
   }, []);
 
@@ -703,14 +729,13 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
   }, []);
 
   const handleDeleteCategory = useCallback(async (code: string) => {
-    const res = await apiFetch(`/api/menu/categories/${code}`, { method: "DELETE", token });
-    if (res.ok) {
+    const { error } = await supabase.from("categories").delete().eq("code", code);
+    if (!error) {
       setCategories((prev) => prev.filter((c) => c.code !== code));
     } else {
-      const data = await res.json().catch(() => ({}));
-      alert(data.error ?? "Failed to delete category.");
+      alert(error.message ?? "Failed to delete category.");
     }
-  }, [token]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -761,7 +786,6 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
                 category={cat}
                 items={items.filter((i) => i.categoryCode === cat.code).sort((a, b) => a.displayOrder - b.displayOrder)}
                 categories={categories}
-                token={token}
                 onUpdateItem={handleUpdateItem}
                 onDeleteItem={handleDeleteItem}
                 onAddItem={(code) => setCreatingItemFor(code)}
@@ -778,7 +802,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
           mode="create"
           categories={categories}
           defaultCategoryCode={creatingItemFor}
-          token={token}
+          existingItems={items}
           onSaved={(item) => { handleUpdateItem(item); setCreatingItemFor(null); }}
           onClose={() => setCreatingItemFor(null)}
         />
@@ -786,7 +810,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
       {creatingCategory && (
         <CategoryModal
           mode="create"
-          token={token}
+          existingCategories={categories}
           onSaved={(cat) => { handleSavedCategory(cat); setCreatingCategory(false); }}
           onClose={() => setCreatingCategory(false)}
         />
@@ -795,7 +819,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
         <CategoryModal
           mode="edit"
           initial={editingCategory}
-          token={token}
+          existingCategories={categories}
           onSaved={(cat) => { handleSavedCategory(cat); setEditingCategory(null); }}
           onClose={() => setEditingCategory(null)}
         />
@@ -805,7 +829,8 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
 }
 
 export default function AuthorPage() {
-  const { token, save, clear } = useToken();
-  if (!token) return <LoginPage onLogin={save} />;
-  return <Dashboard token={token} onLogout={clear} />;
+  const { token, ready, clear } = useSession();
+  if (!ready) return null;
+  if (!token) return <LoginPage />;
+  return <Dashboard onLogout={clear} />;
 }
