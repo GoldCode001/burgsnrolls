@@ -15,6 +15,7 @@ const WHATSAPP_NUMBER = "905488414151";
 export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDrawerProps) {
   const [address, setAddress] = useState("");
   const [addressError, setAddressError] = useState(false);
+  const [note, setNote] = useState("");
 
   const total = items.reduce((sum, i) => {
     const n = parseFloat(i.price.replace(/[^\d.,]/g, "").replace(",", "."));
@@ -42,6 +43,7 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
       `💰 *Total: ${total.toFixed(0)}₺*`,
       "",
       `📍 *Delivery Address:* ${address.trim()}`,
+      ...(note.trim() ? ["", `📝 *Note:* ${note.trim()}`] : []),
       "",
       "Please confirm my order. Thank you!",
     ].join("\n");
@@ -141,6 +143,18 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
                 <p className="text-xs text-destructive mt-1">Please enter your delivery address.</p>
               )}
             </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">
+                Note <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
+              </label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={2}
+                placeholder="Any special requests..."
+                className="w-full border border-border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
             <button
               onClick={placeOrder}
               className="w-full bg-green-500 hover:bg-green-600 active:scale-95 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer text-base"
@@ -160,4 +174,3 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
     </>
   );
 }
-
