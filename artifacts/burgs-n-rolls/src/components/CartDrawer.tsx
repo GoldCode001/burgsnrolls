@@ -47,7 +47,8 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
       (i) => `• ${i.qty}x ${i.code} - ${i.name} (${i.price} each)`
     );
     const message = [
-      "🍔 *Order from Burgs & Rolls*",
+      "*Burgs n Rolls Cyprus*",
+      `${WHATSAPP_NUMBER}`,
       "",
       ...lines,
       "",
@@ -206,4 +207,3 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
     </>
   );
 }
-
