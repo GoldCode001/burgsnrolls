@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { X, Trash2, ShoppingBag, MessageCircle } from "lucide-react";
 import type { CartItem } from "../App";
 
@@ -12,6 +13,9 @@ interface CartDrawerProps {
 const WHATSAPP_NUMBER = "905488414151";
 
 export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDrawerProps) {
+  const [address, setAddress] = useState("");
+  const [addressError, setAddressError] = useState(false);
+
   const total = items.reduce((sum, i) => {
     const n = parseFloat(i.price.replace(/[^\d.,]/g, "").replace(",", "."));
     return Number.isFinite(n) ? sum + n * i.qty : sum;
@@ -20,6 +24,12 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
 
   function placeOrder() {
     if (items.length === 0) return;
+
+    if (!address.trim()) {
+      setAddressError(true);
+      return;
+    }
+    setAddressError(false);
 
     const lines = items.map(
       (i) => `• ${i.qty}x ${i.code} - ${i.name} (${i.price} each)`
@@ -30,6 +40,8 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
       ...lines,
       "",
       `💰 *Total: ${total.toFixed(0)}₺*`,
+      "",
+      `📍 *Delivery Address:* ${address.trim()}`,
       "",
       "Please confirm my order. Thank you!",
     ].join("\n");
@@ -109,6 +121,26 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
                 Some items are special offers — final price confirmed on WhatsApp.
               </p>
             )}
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">
+                Delivery Address
+              </label>
+              <textarea
+                value={address}
+                onChange={(e) => {
+                  setAddress(e.target.value);
+                  if (e.target.value.trim()) setAddressError(false);
+                }}
+                rows={2}
+                placeholder="Street, building, floor, area..."
+                className={`w-full border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary ${
+                  addressError ? "border-destructive" : "border-border"
+                }`}
+              />
+              {addressError && (
+                <p className="text-xs text-destructive mt-1">Please enter your delivery address.</p>
+              )}
+            </div>
             <button
               onClick={placeOrder}
               className="w-full bg-green-500 hover:bg-green-600 active:scale-95 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer text-base"
@@ -128,3 +160,4 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
     </>
   );
 }
+
