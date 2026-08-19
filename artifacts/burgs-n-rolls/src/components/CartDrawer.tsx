@@ -15,6 +15,8 @@ const WHATSAPP_NUMBER = "905488414151";
 export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDrawerProps) {
   const [address, setAddress] = useState("");
   const [addressError, setAddressError] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState(false);
   const [note, setNote] = useState("");
 
   const total = items.reduce((sum, i) => {
@@ -26,11 +28,20 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
   function placeOrder() {
     if (items.length === 0) return;
 
+    let hasError = false;
     if (!address.trim()) {
       setAddressError(true);
-      return;
+      hasError = true;
+    } else {
+      setAddressError(false);
     }
-    setAddressError(false);
+    if (!phone.trim()) {
+      setPhoneError(true);
+      hasError = true;
+    } else {
+      setPhoneError(false);
+    }
+    if (hasError) return;
 
     const lines = items.map(
       (i) => `• ${i.qty}x ${i.code} - ${i.name} (${i.price} each)`
@@ -43,6 +54,7 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
       `💰 *Total: ${total.toFixed(0)}₺*`,
       "",
       `📍 *Delivery Address:* ${address.trim()}`,
+      `📞 *Phone Number:* ${phone.trim()}`,
       ...(note.trim() ? ["", `📝 *Note:* ${note.trim()}`] : []),
       "",
       "Please confirm my order. Thank you!",
@@ -145,6 +157,26 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
             </div>
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                  if (e.target.value.trim()) setPhoneError(false);
+                }}
+                placeholder="e.g. 0548 841 4151"
+                className={`w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary ${
+                  phoneError ? "border-destructive" : "border-border"
+                }`}
+              />
+              {phoneError && (
+                <p className="text-xs text-destructive mt-1">Please enter your phone number.</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">
                 Note <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
               </label>
               <textarea
@@ -174,3 +206,4 @@ export function CartDrawer({ open, onClose, items, onRemove, onClear }: CartDraw
     </>
   );
 }
+
