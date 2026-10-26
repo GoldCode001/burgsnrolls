@@ -32,7 +32,7 @@ export const menuItems: MenuItem[] = [
     image: "/offer1.png",
     ingredients: ["1 Zinger Burger", "3 Onion Rings", "3 Chicken Popcorn", "Fries", "Cola"],
     category: "special",
-    price: "Limited Offer",
+    price: "490₺",
   },
   {
     id: "o2",
@@ -41,7 +41,7 @@ export const menuItems: MenuItem[] = [
     image: "/offer2.png",
     ingredients: ["1 Zinger Burger", "1 Wrap", "Fries", "1L Coca-Cola"],
     category: "special",
-    price: "Limited Offer",
+    price: "770₺",
   },
   {
     id: "d1",
@@ -50,7 +50,7 @@ export const menuItems: MenuItem[] = [
     image: "/d1.jpeg",
     ingredients: ["Chicken Pieces", "Fries", "Special Sauces", "Ayran"],
     category: "wraps",
-    price: "230₺",
+    price: "380₺",
   },
   {
     id: "d2",
@@ -59,7 +59,7 @@ export const menuItems: MenuItem[] = [
     image: "/d2.jpeg",
     ingredients: ["Chicken Pops", "Fries", "Ketchup", "Mayonnaise", "Cabbage", "Lettuce", "Ayran"],
     category: "wraps",
-    price: "220₺",
+    price: "360₺",
   },
   {
     id: "d3",
@@ -68,7 +68,7 @@ export const menuItems: MenuItem[] = [
     image: "/d3.jpeg",
     ingredients: ["Chicken Pieces", "Fries", "Hot Sauce", "Salad", "Ayran"],
     category: "wraps",
-    price: "240₺",
+    price: "380₺",
   },
   {
     id: "d4",
@@ -77,7 +77,7 @@ export const menuItems: MenuItem[] = [
     image: "/d4.jpeg",
     ingredients: ["Chicken Grilled", "Fries", "Ketchup", "Mayonnaise", "Cabbage", "Lettuce", "Ayran"],
     category: "wraps",
-    price: "250₺",
+    price: "390₺",
   },
   {
     id: "d5",
@@ -86,7 +86,7 @@ export const menuItems: MenuItem[] = [
     image: "/d5.jpeg",
     ingredients: ["Tuna Fish", "Fries", "Salads", "Ketchup", "Mayonnaise", "Ayran"],
     category: "wraps",
-    price: "220₺",
+    price: "340₺",
   },
   {
     id: "d6",
@@ -95,7 +95,7 @@ export const menuItems: MenuItem[] = [
     image: "/d6.jpeg",
     ingredients: ["Onion Rings", "Carrots", "Fries", "Cabbage", "Lettuce", "Ayran"],
     category: "wraps",
-    price: "200₺",
+    price: "360₺",
   },
   {
     id: "d7",
@@ -104,7 +104,7 @@ export const menuItems: MenuItem[] = [
     image: "/d7.jpeg",
     ingredients: ["Beef", "Mix Spices", "Fries", "Sauces", "Cabbage", "Lettuce", "Ayran"],
     category: "wraps",
-    price: "270₺",
+    price: "420₺",
   },
   {
     id: "d8",
@@ -113,7 +113,7 @@ export const menuItems: MenuItem[] = [
     image: "/d8.jpeg",
     ingredients: ["Chicken", "Beef", "Fries", "Sauces"],
     category: "wraps",
-    price: "320₺",
+    price: "540₺",
   },
   {
     id: "d9",
@@ -122,7 +122,7 @@ export const menuItems: MenuItem[] = [
     image: "/d9.jpeg",
     ingredients: ["Chicken", "Onion Rings", "Fries", "Sauces"],
     category: "wraps",
-    price: "250₺",
+    price: "400₺",
   },
   {
     id: "b1",
@@ -131,7 +131,7 @@ export const menuItems: MenuItem[] = [
     image: "/b1.jpeg",
     ingredients: ["200g Fresh Chicken", "Lettuce", "Sauces", "Fries", "330ml Coca-Cola"],
     category: "burgers",
-    price: "260₺",
+    price: "460₺",
   },
   {
     id: "b2",
@@ -140,7 +140,7 @@ export const menuItems: MenuItem[] = [
     image: "/b2.jpeg",
     ingredients: ["400g Fresh Chicken Breast", "Cheese", "Lettuce", "Sauces", "330ml Coca-Cola"],
     category: "burgers",
-    price: "360₺",
+    price: "560₺",
   },
   {
     id: "b3",
@@ -149,7 +149,7 @@ export const menuItems: MenuItem[] = [
     image: "/b3.jpeg",
     ingredients: ["200g Fresh Grilled Chicken", "Lettuce", "Sauces", "Fries", "330ml Coca-Cola"],
     category: "burgers",
-    price: "270₺",
+    price: "460₺",
   },
   {
     id: "b4",
@@ -158,7 +158,7 @@ export const menuItems: MenuItem[] = [
     image: "/b4.jpeg",
     ingredients: ["400g Fresh Grilled Chicken Breast", "Lettuce", "Sauces", "Fries", "330ml Coca-Cola"],
     category: "burgers",
-    price: "370₺",
+    price: "570₺",
   },
   {
     id: "b5",
@@ -167,7 +167,7 @@ export const menuItems: MenuItem[] = [
     image: "/b5.jpeg",
     ingredients: ["195g Fresh Spicy Chicken Fingers", "Chips", "Cheese", "Sauces", "330ml Coca-Cola"],
     category: "burgers",
-    price: "270₺",
+    price: "490₺",
   },
   {
     id: "b6",
@@ -176,7 +176,7 @@ export const menuItems: MenuItem[] = [
     image: "/b6.jpeg",
     ingredients: ["185g Fresh Chicken Breast", "Onion Rings", "BBQ Sauce", "Lettuce", "Fries", "330ml Coca-Cola"],
     category: "burgers",
-    price: "300₺",
+    price: "480₺",
   },
   {
     id: "b7",
@@ -185,7 +185,7 @@ export const menuItems: MenuItem[] = [
     image: "/b7.jpeg",
     ingredients: ["190g Fresh Chicken", "Mushrooms", "Sauces", "Grilled Onion", "Fries", "330ml Coca-Cola"],
     category: "burgers",
-    price: "300₺",
+    price: "480₺",
   },
   {
     id: "b8",
@@ -194,7 +194,7 @@ export const menuItems: MenuItem[] = [
     image: "/b8.jpeg",
     ingredients: ["120g Beef", "Grilled Halloumi", "Grilled Onion", "Tomatoes", "Sauces", "Fries", "330ml Coca-Cola"],
     category: "beef",
-    price: "340₺",
+    price: "510₺",
   },
   {
     id: "b9",
@@ -203,7 +203,7 @@ export const menuItems: MenuItem[] = [
     image: "/b9.jpeg",
     ingredients: ["240g Beef", "Grilled Onion", "Tomatoes", "Cheese", "Burger Sauce", "Mix Sauce", "Fries", "330ml Coca-Cola"],
     category: "beef",
-    price: "440₺",
+    price: "620₺",
   },
   {
     id: "b10",
@@ -212,7 +212,7 @@ export const menuItems: MenuItem[] = [
     image: "/b10.jpeg",
     ingredients: ["120g Beef", "Cheese", "Onion", "Tomatoes", "Pickles", "Sweet Chili", "Fries", "330ml Coca-Cola"],
     category: "beef",
-    price: "350₺",
+    price: "510₺",
   },
   {
     id: "b11",
@@ -221,7 +221,7 @@ export const menuItems: MenuItem[] = [
     image: "/b11.jpeg",
     ingredients: ["120g Beef", "Onion", "Mild Hot Sauces", "African Season Spices", "Fries", "330ml Coca-Cola"],
     category: "beef",
-    price: "300₺",
+    price: "500₺",
   },
   {
     id: "b12",
@@ -230,7 +230,7 @@ export const menuItems: MenuItem[] = [
     image: "/b12.jpeg",
     ingredients: ["120g Beef", "Grilled Mushrooms", "Cheese", "Grilled Onion", "Mix Sauce", "Fries", "330ml Coca-Cola"],
     category: "beef",
-    price: "350₺",
+    price: "510₺",
   },
   {
     id: "b13",
@@ -239,7 +239,7 @@ export const menuItems: MenuItem[] = [
     image: "/b13.jpeg",
     ingredients: ["120g Beef", "Onion Rings", "BBQ Sauce", "Cheese", "Special Sauce", "Fries", "330ml Coca-Cola"],
     category: "beef",
-    price: "340₺",
+    price: "510₺",
   },
   {
     id: "b14",
@@ -248,7 +248,7 @@ export const menuItems: MenuItem[] = [
     image: "/b14.jpeg",
     ingredients: ["120g Beef", "Grilled Onion", "Grilled Tomatoes", "Pickles", "Cheese", "Jalapeño", "Mix Sauce", "Mix Spices", "330ml Coca-Cola"],
     category: "beef",
-    price: "360₺",
+    price: "560₺",
   },
   {
     id: "k1",
@@ -257,7 +257,7 @@ export const menuItems: MenuItem[] = [
     image: "/k1.jpeg",
     ingredients: ["9 Hot Wings", "Bread", "Fries", "330ml Coca-Cola"],
     category: "kentucky",
-    price: "350₺",
+    price: "580₺",
   },
   {
     id: "k2",
@@ -266,7 +266,7 @@ export const menuItems: MenuItem[] = [
     image: "/k2.jpeg",
     ingredients: ["6 Hot Wings", "Bread", "Fries", "330ml Coca-Cola"],
     category: "kentucky",
-    price: "280₺",
+    price: "490₺",
   },
   {
     id: "k3",
@@ -275,7 +275,7 @@ export const menuItems: MenuItem[] = [
     image: "/k3.jpeg",
     ingredients: ["200g Fresh Chicken Pops", "Fries", "Bread", "330ml Coca-Cola"],
     category: "kentucky",
-    price: "270₺",
+    price: "460₺",
   },
   {
     id: "k4",
@@ -284,7 +284,7 @@ export const menuItems: MenuItem[] = [
     image: "/k4.jpeg",
     ingredients: ["200g Fresh Chicken Fingers", "Fries", "Bread", "330ml Coca-Cola"],
     category: "kentucky",
-    price: "280₺",
+    price: "480₺",
   },
   {
     id: "k5",
@@ -293,7 +293,7 @@ export const menuItems: MenuItem[] = [
     image: "/k5.jpeg",
     ingredients: ["200g B&R Special Nuggets", "Fries", "Bread", "330ml Coca-Cola"],
     category: "kentucky",
-    price: "280₺",
+    price: "480₺",
   },
   {
     id: "k6",
@@ -302,7 +302,7 @@ export const menuItems: MenuItem[] = [
     image: "/k6.jpeg",
     ingredients: ["10 Hot Wings", "10 Chicken Fingers", "10 Pops", "Fries", "Bread", "1.5lt Coca-Cola"],
     category: "kentucky",
-    price: "820₺",
+    price: "1480₺",
   },
   {
     id: "k7",
@@ -311,7 +311,7 @@ export const menuItems: MenuItem[] = [
     image: "/k7.jpeg",
     ingredients: ["10 Hot Wings", "10 Chicken Fingers", "Fries", "Bread", "1lt Coca-Cola"],
     category: "kentucky",
-    price: "590₺",
+    price: "920₺",
   },
   {
     id: "k8",
@@ -320,7 +320,7 @@ export const menuItems: MenuItem[] = [
     image: "/k8.jpeg",
     ingredients: ["8 Hot Wings", "Xtra Spicy Sauce", "Fries", "Bread", "330ml Coca-Cola"],
     category: "kentucky",
-    price: "350₺",
+    price: "600₺",
   },
   {
     id: "a1",
