@@ -374,7 +374,7 @@ export const menuItems: MenuItem[] = [
     image: "/s2.jpeg",
     ingredients: ["Grilled Chicken", "Fresh Salad", "Carrots", "Cabbage", "Fries", "Ayran"],
     category: "salads",
-    price: "260₺",
+    price: "350₺",
   },
   {
     id: "s3",
@@ -383,7 +383,7 @@ export const menuItems: MenuItem[] = [
     image: "/s3.jpeg",
     ingredients: ["Tuna Fish", "Fresh Salad", "Carrots", "Cabbage", "Fries", "Ayran"],
     category: "salads",
-    price: "250₺",
+    price: "320₺",
   },
   {
     id: "s4",
@@ -392,7 +392,7 @@ export const menuItems: MenuItem[] = [
     image: "/s4.jpeg",
     ingredients: ["Fresh Vegetables", "Cabbage", "Tomatoes", "Lettuce", "Fries", "Ayran"],
     category: "salads",
-    price: "220₺",
+    price: "300₺",
   },
   {
     id: "r1",
@@ -401,7 +401,7 @@ export const menuItems: MenuItem[] = [
     image: "/r1.jpeg",
     ingredients: ["Basmati Rice", "Popcorn Chicken", "Fries", "Ketchup", "Mayonnaise", "Ayran"],
     category: "rice",
-    price: "250₺",
+    price: "390₺",
   },
   {
     id: "r2",
@@ -410,7 +410,7 @@ export const menuItems: MenuItem[] = [
     image: "/r2.jpeg",
     ingredients: ["Basmati Rice", "Chicken Fingers", "Fries", "Ketchup", "Mayonnaise", "Ayran"],
     category: "rice",
-    price: "270₺",
+    price: "390₺",
   },
   {
     id: "r3",
@@ -419,7 +419,7 @@ export const menuItems: MenuItem[] = [
     image: "/r3.jpeg",
     ingredients: ["Basmati Rice", "3 Hot Wings", "Fries", "Ketchup", "Mayonnaise", "Ayran"],
     category: "rice",
-    price: "280₺",
+    price: "400₺",
   },
   {
     id: "r4",
@@ -428,6 +428,6 @@ export const menuItems: MenuItem[] = [
     image: "/r4.jpeg",
     ingredients: ["Basmati Rice", "Chicken Shashlik", "Special Sauce", "Fries", "Ketchup", "Mayonnaise", "Ayran"],
     category: "rice",
-    price: "280₺",
+    price: "390₺",
   },
 ];
